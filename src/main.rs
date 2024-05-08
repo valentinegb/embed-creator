@@ -1,3 +1,5 @@
+mod embed_command;
+
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
@@ -9,9 +11,9 @@ use axum::{
 };
 use serenity::{
     all::{
-        Command, Context, CreateCommand, CreateInteractionResponse,
-        CreateInteractionResponseMessage, EventHandler, GatewayIntents, InstallationContext,
-        Interaction, InteractionContext, Ready, ShardManager, Verifier,
+        Color, Command, Context, CreateEmbed, CreateInteractionResponse,
+        CreateInteractionResponseMessage, EventHandler, GatewayIntents, Interaction, Ready,
+        ShardManager, Verifier,
     },
     prelude::TypeMapKey,
     Client,
@@ -32,18 +34,9 @@ struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _ready: Ready) {
         info!("Setting global commands");
-        Command::set_global_commands(
-            &ctx,
-            vec![CreateCommand::new("embed")
-                .description("Create and send an embed")
-                .integration_types(vec![InstallationContext::User])
-                .contexts(vec![
-                    InteractionContext::Guild,
-                    InteractionContext::PrivateChannel,
-                ])],
-        )
-        .await
-        .unwrap();
+        Command::set_global_commands(&ctx, vec![embed_command::register()])
+            .await
+            .unwrap();
         info!("Shutting down Discord client");
 
         let data = ctx.data.read().await;
@@ -90,11 +83,22 @@ async fn interactions(
 
     match interaction {
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
-        Interaction::Command(_interaction) => Ok(Json(CreateInteractionResponse::Message(
-            CreateInteractionResponseMessage::new()
-                .content("I'm aliiiiive!")
-                .ephemeral(true),
-        ))),
+        Interaction::Command(interaction) => Ok(Json(
+            embed_command::execute(interaction)
+                .await
+                .unwrap_or_else(|err| {
+                    CreateInteractionResponse::Message(
+                        CreateInteractionResponseMessage::new()
+                            .embed(
+                                CreateEmbed::new()
+                                    .title("Error")
+                                    .description(err.to_string())
+                                    .color(Color::RED),
+                            )
+                            .ephemeral(true),
+                    )
+                }),
+        )),
         _ => Err(StatusCode::NOT_IMPLEMENTED),
     }
 }

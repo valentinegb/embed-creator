@@ -1,6 +1,6 @@
 mod embed_command;
 
-use std::sync::Arc;
+use std::{io::Read, sync::Arc};
 
 use anyhow::{anyhow, Result};
 use axum::{
@@ -20,7 +20,7 @@ use serenity::{
 };
 use shuttle_axum::ShuttleAxum;
 use shuttle_runtime::{SecretStore, Secrets};
-use tracing::info;
+use tracing::{debug, error, info};
 
 struct ShardManagerContainer;
 
@@ -74,12 +74,22 @@ async fn interactions(
             &body,
         )
         .map_err(|_err| StatusCode::UNAUTHORIZED)?;
-    info!("Parsing body");
+    info!("Security verified, parsing body");
 
-    let Json(interaction): Json<Interaction> =
-        Json::from_bytes(&body).map_err(|_err| StatusCode::BAD_REQUEST)?;
+    let Json(interaction): Json<Interaction> = Json::from_bytes(&body).map_err(|_err| {
+        error!("Failed to parse body");
 
-    info!("Responding");
+        let mut string = String::new();
+
+        if let Ok(_) = body.as_ref().read_to_string(&mut string) {
+            debug!("As a string, it was: {string}");
+        }
+
+        StatusCode::BAD_REQUEST
+    })?;
+
+    debug!("{interaction:#?}");
+    info!("Responding to interaction");
 
     match interaction {
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
@@ -87,6 +97,8 @@ async fn interactions(
             embed_command::execute(interaction)
                 .await
                 .unwrap_or_else(|err| {
+                    error!("Failed to run embed command: {err}");
+
                     CreateInteractionResponse::Message(
                         CreateInteractionResponseMessage::new()
                             .embed(

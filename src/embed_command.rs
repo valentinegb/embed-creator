@@ -6,6 +6,9 @@ use serenity::all::{
 };
 
 pub(super) fn register() -> CreateCommand {
+    const COLOR_NAME: &str = "color";
+    const COLOR_DESCRIPTION: &str = "Color of your embed";
+
     CreateCommand::new("embed")
         .description("Create and send an embed")
         .set_options(vec![
@@ -18,7 +21,9 @@ pub(super) fn register() -> CreateCommand {
             )
             .max_length(4096),
             CreateCommandOption::new(CommandOptionType::String, "url", "URL of your embed"),
-            CreateCommandOption::new(CommandOptionType::String, "color", "Color of your embed")
+            CreateCommandOption::new(CommandOptionType::String, COLOR_NAME, COLOR_DESCRIPTION)
+                .name_localized("en-US", COLOR_NAME)
+                .description_localized("en-US", COLOR_DESCRIPTION)
                 .name_localized("en-GB", "colour")
                 .description_localized("en-GB", "Colour of your embed")
                 .set_autocomplete(true),

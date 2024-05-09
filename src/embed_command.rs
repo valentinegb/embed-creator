@@ -17,6 +17,7 @@ pub(super) fn register() -> CreateCommand {
                 "Description of your embed",
             )
             .max_length(4096),
+            CreateCommandOption::new(CommandOptionType::String, "url", "URL of your embed"),
         ])
         .integration_types(vec![InstallationContext::User])
         .contexts(vec![
@@ -42,6 +43,12 @@ pub(super) async fn execute(interaction: CommandInteraction) -> Result<CreateInt
                     embed = embed.description(value);
                 }
                 _ => bail!("Expected value of option `description` to be a string"),
+            },
+            "url" => match option.value {
+                ResolvedValue::String(value) => {
+                    embed = embed.url(value);
+                }
+                _ => bail!("Expected value of option `url` to be a string"),
             },
             other => bail!("Received unknown option `{other}`"),
         }

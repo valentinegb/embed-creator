@@ -1,8 +1,11 @@
 [package]
 name = "embed-creator"
 version = "0.1.0"
+authors = ["Valentine Briese <valentinegb@icloud.com>"]
 edition = "2021"
+repository = "https://github.com/valentinegb/embed-creator"
 license = "AGPL-3.0-or-later"
+publish = false
 
 [dependencies]
 anyhow = "1.0.83"

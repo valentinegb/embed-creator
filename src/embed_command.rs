@@ -29,29 +29,41 @@ pub(super) fn register() -> CreateCommand {
 pub(super) async fn execute(interaction: CommandInteraction) -> Result<CreateInteractionResponse> {
     let options = interaction.data.options();
     let mut embed = CreateEmbed::new();
+    let mut has_title = false;
+    let mut has_description = false;
 
     for option in options {
         match option.name {
             "title" => match option.value {
                 ResolvedValue::String(value) => {
                     embed = embed.title(value);
+                    has_title = true;
                 }
                 _ => bail!("Expected value of option `title` to be a string"),
             },
             "description" => match option.value {
                 ResolvedValue::String(value) => {
                     embed = embed.description(value);
+                    has_description = true;
                 }
                 _ => bail!("Expected value of option `description` to be a string"),
             },
             "url" => match option.value {
                 ResolvedValue::String(value) => {
-                    embed = embed.url(value);
+                    if has_title {
+                        embed = embed.url(value);
+                    } else {
+                        bail!("Embed must have title to have URL");
+                    }
                 }
                 _ => bail!("Expected value of option `url` to be a string"),
             },
             other => bail!("Received unknown option `{other}`"),
         }
+    }
+
+    if !has_title && !has_description {
+        bail!("Embed must have at least a title or description");
     }
 
     Ok(CreateInteractionResponse::Message(

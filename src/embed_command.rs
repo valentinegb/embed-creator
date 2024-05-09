@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use serenity::all::{
-    AutocompleteChoice, CommandInteraction, CommandOptionType, CreateAutocompleteResponse,
+    AutocompleteChoice, Color, CommandInteraction, CommandOptionType, CreateAutocompleteResponse,
     CreateCommand, CreateCommandOption, CreateEmbed, CreateInteractionResponse,
     CreateInteractionResponseMessage, InstallationContext, InteractionContext, ResolvedValue,
 };
@@ -59,6 +59,40 @@ pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteracti
                     }
                 }
                 _ => bail!("Expected value of option `url` to be a string"),
+            },
+            "color" => match option.value {
+                ResolvedValue::String(value) => match value {
+                    "BLITZ_BLUE" => embed = embed.color(Color::BLITZ_BLUE),
+                    "BLUE" => embed = embed.color(Color::BLUE),
+                    "BLURPLE" => embed = embed.color(Color::BLURPLE),
+                    "DARK_BLUE" => embed = embed.color(Color::DARK_BLUE),
+                    "DARK_GOLD" => embed = embed.color(Color::DARK_GOLD),
+                    "DARK_GREEN" => embed = embed.color(Color::DARK_GREEN),
+                    "DARK_GREY" => embed = embed.color(Color::DARK_GREY),
+                    "DARK_MAGENTA" => embed = embed.color(Color::DARK_MAGENTA),
+                    "DARK_ORANGE" => embed = embed.color(Color::DARK_ORANGE),
+                    "DARK_PURPLE" => embed = embed.color(Color::DARK_PURPLE),
+                    "DARK_RED" => embed = embed.color(Color::DARK_RED),
+                    "DARK_TEAL" => embed = embed.color(Color::DARK_TEAL),
+                    "DARKER_GREY" => embed = embed.color(Color::DARKER_GREY),
+                    "FABLED_PINK" => embed = embed.color(Color::FABLED_PINK),
+                    "FADED_PURPLE" => embed = embed.color(Color::FADED_PURPLE),
+                    "FOOYOO" => embed = embed.color(Color::FOOYOO),
+                    "GOLD" => embed = embed.color(Color::GOLD),
+                    "KERBAL" => embed = embed.color(Color::KERBAL),
+                    "LIGHT_GREY" => embed = embed.color(Color::LIGHT_GREY),
+                    "LIGHTER_GREY" => embed = embed.color(Color::LIGHTER_GREY),
+                    "MAGENTA" => embed = embed.color(Color::MAGENTA),
+                    "MEIBE_PINK" => embed = embed.color(Color::MEIBE_PINK),
+                    "ORANGE" => embed = embed.color(Color::ORANGE),
+                    "PURPLE" => embed = embed.color(Color::PURPLE),
+                    "RED" => embed = embed.color(Color::RED),
+                    "ROHRKATZE_BLUE" => embed = embed.color(Color::ROHRKATZE_BLUE),
+                    "ROSEWATER" => embed = embed.color(Color::ROSEWATER),
+                    "TEAL" => embed = embed.color(Color::TEAL),
+                    other => bail!("Got an unexpected color: {other}"),
+                },
+                _ => bail!("Expected value of option `color` to be a string"),
             },
             other => bail!("Received unknown or unimplemented option `{other}`"),
         }

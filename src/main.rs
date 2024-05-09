@@ -94,23 +94,24 @@ async fn interactions(
     match interaction {
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
         Interaction::Command(interaction) => Ok(Json(
-            embed_command::execute(interaction)
-                .await
-                .unwrap_or_else(|err| {
-                    error!("Failed to run embed command: {err}");
+            embed_command::execute(interaction).unwrap_or_else(|err| {
+                error!("Failed to run embed command: {err}");
 
-                    CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new()
-                            .embed(
-                                CreateEmbed::new()
-                                    .title("Error")
-                                    .description(err.to_string())
-                                    .color(Color::RED),
-                            )
-                            .ephemeral(true),
-                    )
-                }),
+                CreateInteractionResponse::Message(
+                    CreateInteractionResponseMessage::new()
+                        .embed(
+                            CreateEmbed::new()
+                                .title("Error")
+                                .description(err.to_string())
+                                .color(Color::RED),
+                        )
+                        .ephemeral(true),
+                )
+            }),
         )),
+        Interaction::Autocomplete(interaction) => {
+            Ok(Json(embed_command::autocomplete(interaction)))
+        }
         _ => Err(StatusCode::NOT_IMPLEMENTED),
     }
 }

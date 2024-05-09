@@ -1,8 +1,8 @@
 use anyhow::{bail, Result};
 use serenity::all::{
-    CommandInteraction, CommandOptionType, CreateCommand, CreateCommandOption, CreateEmbed,
-    CreateInteractionResponse, CreateInteractionResponseMessage, InstallationContext,
-    InteractionContext, ResolvedValue,
+    AutocompleteChoice, CommandInteraction, CommandOptionType, CreateAutocompleteResponse,
+    CreateCommand, CreateCommandOption, CreateEmbed, CreateInteractionResponse,
+    CreateInteractionResponseMessage, InstallationContext, InteractionContext, ResolvedValue,
 };
 
 pub(super) fn register() -> CreateCommand {
@@ -18,6 +18,8 @@ pub(super) fn register() -> CreateCommand {
             )
             .max_length(4096),
             CreateCommandOption::new(CommandOptionType::String, "url", "URL of your embed"),
+            CreateCommandOption::new(CommandOptionType::String, "color", "Color of your embed")
+                .set_autocomplete(true),
         ])
         .integration_types(vec![InstallationContext::User])
         .contexts(vec![
@@ -26,7 +28,7 @@ pub(super) fn register() -> CreateCommand {
         ])
 }
 
-pub(super) async fn execute(interaction: CommandInteraction) -> Result<CreateInteractionResponse> {
+pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteractionResponse> {
     let options = interaction.data.options();
     let mut embed = CreateEmbed::new();
     let mut has_title = false;
@@ -58,7 +60,7 @@ pub(super) async fn execute(interaction: CommandInteraction) -> Result<CreateInt
                 }
                 _ => bail!("Expected value of option `url` to be a string"),
             },
-            other => bail!("Received unknown option `{other}`"),
+            other => bail!("Received unknown or unimplemented option `{other}`"),
         }
     }
 
@@ -69,4 +71,60 @@ pub(super) async fn execute(interaction: CommandInteraction) -> Result<CreateInt
     Ok(CreateInteractionResponse::Message(
         CreateInteractionResponseMessage::new().embed(embed),
     ))
+}
+
+pub(super) fn autocomplete(interaction: CommandInteraction) -> CreateInteractionResponse {
+    let choices = vec![
+        ("Blitz Blue", "BLITZ_BLUE"),
+        ("Blue", "BLUE"),
+        ("Blurple", "BLURPLE"),
+        ("Dark Blue", "DARK_BLUE"),
+        ("Dark Gold", "DARK_GOLD"),
+        ("Dark Green", "DARK_GREEN"),
+        ("Dark Grey", "DARK_GREY"),
+        ("Dark Magenta", "DARK_MAGENTA"),
+        ("Dark Orange", "DARK_ORANGE"),
+        ("Dark Purple", "DARK_PURPLE"),
+        ("Dark Red", "DARK_RED"),
+        ("Dark Teal", "DARK_TEAL"),
+        ("Darker Grey", "DARKER_GREY"),
+        ("Fabled Pink", "FABLED_PINK"),
+        ("Faded Purple", "FADED_PURPLE"),
+        ("Fooyoo", "FOOYOO"),
+        ("Gold", "GOLD"),
+        ("Kerbal", "KERBAL"),
+        ("Light Grey", "LIGHT_GREY"),
+        ("Lighter Grey", "LIGHTER_GREY"),
+        ("Magenta", "MAGENTA"),
+        ("Meibe Pink", "MEIBE_PINK"),
+        ("Orange", "ORANGE"),
+        ("Purple", "PURPLE"),
+        ("Red", "RED"),
+        ("Rohrkatze Blue", "ROHRKATZE_BLUE"),
+        ("Rosewater", "ROSEWATER"),
+        ("Teal", "TEAL"),
+    ];
+    let mut filtered_choices: Vec<AutocompleteChoice> = choices
+        .iter()
+        .filter_map(|(name, value)| {
+            if name.to_lowercase().contains(
+                &interaction
+                    .data
+                    .autocomplete()
+                    .unwrap()
+                    .value
+                    .to_lowercase(),
+            ) {
+                Some(AutocompleteChoice::new(*name, *value))
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    filtered_choices.truncate(25);
+
+    CreateInteractionResponse::Autocomplete(
+        CreateAutocompleteResponse::new().set_choices(filtered_choices),
+    )
 }

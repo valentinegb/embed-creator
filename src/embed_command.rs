@@ -46,7 +46,7 @@ pub(super) fn register() -> CreateCommand {
                 .description_localized("en-GB", "Colour of your embed")
                 .set_autocomplete(true),
         ])
-        .integration_types(vec![InstallationContext::User])
+        .integration_types(vec![InstallationContext::Guild, InstallationContext::User])
         .contexts(vec![
             InteractionContext::Guild,
             InteractionContext::PrivateChannel,

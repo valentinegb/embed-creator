@@ -19,6 +19,8 @@ pub(super) fn register() -> CreateCommand {
             .max_length(4096),
             CreateCommandOption::new(CommandOptionType::String, "url", "URL of your embed"),
             CreateCommandOption::new(CommandOptionType::String, "color", "Color of your embed")
+                .name_localized("en-GB", "colour")
+                .description_localized("en-GB", "Colour of your embed")
                 .set_autocomplete(true),
         ])
         .integration_types(vec![InstallationContext::User])
@@ -92,7 +94,15 @@ pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteracti
                     "TEAL" => embed = embed.color(Color::TEAL),
                     other => bail!("Got an unexpected color: {other}"),
                 },
-                _ => bail!("Expected value of option `color` to be a string"),
+                _ => {
+                    let color_word = if interaction.locale == "en-GB" {
+                        "colour"
+                    } else {
+                        "color"
+                    };
+
+                    bail!("Expected value of option `{color_word}` to be a string");
+                }
             },
             other => bail!("Received unknown or unimplemented option `{other}`"),
         }

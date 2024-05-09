@@ -45,6 +45,11 @@ pub(super) fn register() -> CreateCommand {
                 .name_localized("en-GB", "colour")
                 .description_localized("en-GB", "Colour of your embed")
                 .set_autocomplete(true),
+            CreateCommandOption::new(
+                CommandOptionType::Boolean,
+                "debug",
+                "Whether to show debug representation of your embed instead",
+            ),
         ])
         .integration_types(vec![InstallationContext::Guild, InstallationContext::User])
         .contexts(vec![
@@ -58,6 +63,7 @@ pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteracti
     let mut embed = CreateEmbed::new();
     let mut has_title = false;
     let mut has_description = false;
+    let mut is_debug = false;
 
     for option in options {
         match option.name {
@@ -127,6 +133,10 @@ pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteracti
                     bail!("Expected value of option `{color_word}` to be a string");
                 }
             },
+            "debug" => match option.value {
+                ResolvedValue::Boolean(debug) => is_debug = debug,
+                _ => bail!("Expected value of option `debug` to be a boolean"),
+            },
             other => bail!("Received unknown or unimplemented option `{other}`"),
         }
     }
@@ -135,9 +145,14 @@ pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteracti
         bail!("Embed must have at least a title or description");
     }
 
-    Ok(CreateInteractionResponse::Message(
-        CreateInteractionResponseMessage::new().embed(embed),
-    ))
+    match is_debug {
+        true => Ok(CreateInteractionResponse::Message(
+            CreateInteractionResponseMessage::new().content(format!("```rs\n{embed:#?}\n```")),
+        )),
+        false => Ok(CreateInteractionResponse::Message(
+            CreateInteractionResponseMessage::new().embed(embed),
+        )),
+    }
 }
 
 pub(super) fn autocomplete(interaction: CommandInteraction) -> CreateInteractionResponse {

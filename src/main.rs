@@ -112,8 +112,12 @@ async fn interactions(
     match interaction {
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
         Interaction::Command(interaction) => Ok(Json(
-            commands::embed::execute(interaction).unwrap_or_else(|err| {
-                error!("Failed to run embed command: {err}");
+            match interaction.data.name.as_str() {
+                "embed" => commands::embed::execute(interaction),
+                other => Err(anyhow!("Command \"{other}\" cannot be executed")),
+            }
+            .unwrap_or_else(|err| {
+                error!("Failed to execute command: {err}");
 
                 CreateInteractionResponse::Message(
                     CreateInteractionResponseMessage::new()

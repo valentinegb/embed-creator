@@ -16,7 +16,7 @@
 //
 // You may contact me via electronic mail at <valentinegb@icloud.com>.
 
-mod embed_command;
+mod commands;
 
 use std::{io::Read, sync::Arc};
 
@@ -52,7 +52,7 @@ struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _ready: Ready) {
         info!("Setting global commands");
-        Command::set_global_commands(&ctx, vec![embed_command::register()])
+        Command::set_global_commands(&ctx, vec![commands::embed::register()])
             .await
             .unwrap();
         info!("Shutting down Discord client");
@@ -112,7 +112,7 @@ async fn interactions(
     match interaction {
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
         Interaction::Command(interaction) => Ok(Json(
-            embed_command::execute(interaction).unwrap_or_else(|err| {
+            commands::embed::execute(interaction).unwrap_or_else(|err| {
                 error!("Failed to run embed command: {err}");
 
                 CreateInteractionResponse::Message(
@@ -128,7 +128,7 @@ async fn interactions(
             }),
         )),
         Interaction::Autocomplete(interaction) => {
-            Ok(Json(embed_command::autocomplete(interaction)))
+            Ok(Json(commands::embed::autocomplete(interaction)))
         }
         _ => Err(StatusCode::NOT_IMPLEMENTED),
     }

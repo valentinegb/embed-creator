@@ -23,7 +23,7 @@ use serenity::all::{
     CreateInteractionResponseMessage, InstallationContext, InteractionContext, ResolvedValue,
 };
 
-pub(super) fn register() -> CreateCommand {
+pub(crate) fn register() -> CreateCommand {
     const COLOR_NAME: &str = "color";
     const COLOR_DESCRIPTION: &str = "Color of your embed";
 
@@ -58,7 +58,7 @@ pub(super) fn register() -> CreateCommand {
         ])
 }
 
-pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteractionResponse> {
+pub(crate) fn execute(interaction: CommandInteraction) -> Result<CreateInteractionResponse> {
     let options = interaction.data.options();
     let mut embed = CreateEmbed::new();
     let mut has_title = false;
@@ -157,7 +157,7 @@ pub(super) fn execute(interaction: CommandInteraction) -> Result<CreateInteracti
     }
 }
 
-pub(super) fn autocomplete(interaction: CommandInteraction) -> CreateInteractionResponse {
+pub(crate) fn autocomplete(interaction: CommandInteraction) -> CreateInteractionResponse {
     let choices = vec![
         ("Blitz Blue", "BLITZ_BLUE"),
         ("Blue", "BLUE"),

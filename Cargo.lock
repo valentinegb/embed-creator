@@ -162,6 +162,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
+name = "base64"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1194,8 +1200,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "poise"
 version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1819d5a45e3590ef33754abce46432570c54a120798bdbf893112b4211fa09a6"
+source = "git+https://github.com/valentinegb/poise.git?branch=user-apps#bf8d7879f90f52f09a7c711bd3c65fd335ec21d5"
 dependencies = [
  "async-trait",
  "derivative",
@@ -1206,13 +1211,13 @@ dependencies = [
  "serenity",
  "tokio",
  "tracing",
+ "trim-in-place",
 ]
 
 [[package]]
 name = "poise_macros"
 version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fa2c123c961e78315cd3deac7663177f12be4460f5440dbf62a7ed37b1effea"
+source = "git+https://github.com/valentinegb/poise.git?branch=user-apps#bf8d7879f90f52f09a7c711bd3c65fd335ec21d5"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -1406,7 +1411,7 @@ version = "0.11.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd67538700a17451e7cba03ac727fb961abb7607553461627b97de0b89cf4a62"
 dependencies = [
- "base64",
+ "base64 0.21.7",
  "bytes",
  "encoding_rs",
  "futures-core",
@@ -1510,7 +1515,7 @@ version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c74cae0a4cf6ccbbf5f359f08efdf8ee7e1dc532573bf0db71968cb56b1448c"
 dependencies = [
- "base64",
+ "base64 0.21.7",
 ]
 
 [[package]]
@@ -1606,6 +1611,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_cow"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64e84ce5596a72f0c4c60759a10ff8c22d5eaf227b0dc2789c8746193309058b"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.201"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1642,12 +1656,11 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c64da29158bb55d70677cacd4f4f8eab1acef005fb830d9c3bea411b090e96a9"
+source = "git+https://github.com/GnomedDev/serenity.git?branch=user-apps#9410ec2f5ca0a3b50e95d7b0f4d3a5c4258673b1"
 dependencies = [
  "arrayvec",
  "async-trait",
- "base64",
+ "base64 0.22.1",
  "bitflags 2.5.0",
  "bytes",
  "chrono",
@@ -1661,6 +1674,7 @@ dependencies = [
  "reqwest",
  "secrecy",
  "serde",
+ "serde_cow",
  "serde_json",
  "time",
  "tokio",
@@ -1693,9 +1707,8 @@ dependencies = [
 
 [[package]]
 name = "shuttle-codegen"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a0ba1965be7df9f6eacf86ce8e7d13371972620f1b512afb16de0fb7f9842fb"
+version = "0.45.0"
+source = "git+https://github.com/valentinegb/shuttle.git?branch=serenity-user-apps#b750cb7cb4e3b1f8c07e9bbc0ff594b64eb2c5c1"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -1705,9 +1718,8 @@ dependencies = [
 
 [[package]]
 name = "shuttle-common"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f4a7cbeba0ac04ff93e60e7c9cd3fb7a1a06df108b7c6c81ec4237283189f5a"
+version = "0.45.0"
+source = "git+https://github.com/valentinegb/shuttle.git?branch=serenity-user-apps#b750cb7cb4e3b1f8c07e9bbc0ff594b64eb2c5c1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1732,9 +1744,8 @@ dependencies = [
 
 [[package]]
 name = "shuttle-proto"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa562975ec33dfdb0535864e351f0d632af1306f877481bbc5a597bfb7b8ee2e"
+version = "0.45.0"
+source = "git+https://github.com/valentinegb/shuttle.git?branch=serenity-user-apps#b750cb7cb4e3b1f8c07e9bbc0ff594b64eb2c5c1"
 dependencies = [
  "futures-core",
  "prost",
@@ -1745,9 +1756,8 @@ dependencies = [
 
 [[package]]
 name = "shuttle-runtime"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9468e399b464fc49a9e2a89beeb29d5a685c3eb38cbdd4f7da28ae6db055ab86"
+version = "0.45.0"
+source = "git+https://github.com/valentinegb/shuttle.git?branch=serenity-user-apps#b750cb7cb4e3b1f8c07e9bbc0ff594b64eb2c5c1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1761,15 +1771,15 @@ dependencies = [
  "strfmt",
  "tokio",
  "tokio-stream",
+ "tokio-util",
  "tonic",
  "tracing-subscriber",
 ]
 
 [[package]]
 name = "shuttle-serenity"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cb97523f1d30635deca8739e03a312a578631251d1370a23a82439452b18587"
+version = "0.45.0"
+source = "git+https://github.com/valentinegb/shuttle.git?branch=serenity-user-apps#b750cb7cb4e3b1f8c07e9bbc0ff594b64eb2c5c1"
 dependencies = [
  "serenity",
  "shuttle-runtime",
@@ -1777,9 +1787,8 @@ dependencies = [
 
 [[package]]
 name = "shuttle-service"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4687d5f97c43826faf9f2fa665d475696fc71857e5960c3112664480a4a6e6c"
+version = "0.45.0"
+source = "git+https://github.com/valentinegb/shuttle.git?branch=serenity-user-apps#b750cb7cb4e3b1f8c07e9bbc0ff594b64eb2c5c1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2177,7 +2186,7 @@ dependencies = [
  "async-stream",
  "async-trait",
  "axum",
- "base64",
+ "base64 0.21.7",
  "bytes",
  "h2",
  "http 0.2.12",
@@ -2319,6 +2328,12 @@ dependencies = [
  "tracing-log",
  "tracing-serde",
 ]
+
+[[package]]
+name = "trim-in-place"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "343e926fc669bc8cde4fa3129ab681c63671bae288b1f1081ceee6d9d37904fc"
 
 [[package]]
 name = "triomphe"

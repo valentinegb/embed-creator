@@ -39,7 +39,13 @@ struct EmbedWizardModal {
 }
 
 /// Create an embed, with some magic
-#[command(slash_command)]
+#[command(
+    slash_command,
+    guild_installable,
+    user_installable,
+    guild_usable,
+    private_channel_usable
+)]
 async fn embed_wizard(ctx: ApplicationContext<'_>) -> Result<(), Error> {
     let EmbedWizardModal { title, description } = EmbedWizardModal::execute(ctx)
         .await?

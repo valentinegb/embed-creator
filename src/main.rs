@@ -52,9 +52,15 @@ struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _ready: Ready) {
         info!("Setting global commands");
-        Command::set_global_commands(&ctx, vec![commands::embed::register()])
-            .await
-            .unwrap();
+        Command::set_global_commands(
+            &ctx,
+            vec![
+                commands::embed::register(),
+                commands::embed_wizard::register(),
+            ],
+        )
+        .await
+        .unwrap();
         info!("Shutting down Discord client");
 
         let data = ctx.data.read().await;
@@ -113,7 +119,8 @@ async fn interactions(
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
         Interaction::Command(interaction) => Ok(Json(
             match interaction.data.name.as_str() {
-                "embed" => commands::embed::execute(interaction),
+                commands::embed::NAME => commands::embed::execute(interaction),
+                commands::embed_wizard::NAME => commands::embed_wizard::execute(interaction),
                 other => Err(anyhow!("Command \"{other}\" cannot be executed")),
             }
             .unwrap_or_else(|err| {

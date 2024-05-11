@@ -23,11 +23,13 @@ use serenity::all::{
     CreateInteractionResponseMessage, InstallationContext, InteractionContext, ResolvedValue,
 };
 
+pub(crate) const NAME: &str = "embed";
+
 pub(crate) fn register() -> CreateCommand {
     const COLOR_NAME: &str = "color";
     const COLOR_DESCRIPTION: &str = "Color of your embed";
 
-    CreateCommand::new("embed")
+    CreateCommand::new(NAME)
         .description("Create and send an embed")
         .set_options(vec![
             CreateCommandOption::new(CommandOptionType::String, "title", "Title of your embed")

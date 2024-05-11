@@ -17,3 +17,4 @@
 // You may contact me via electronic mail at <valentinegb@icloud.com>.
 
 pub(super) mod embed;
+pub(super) mod embed_wizard;

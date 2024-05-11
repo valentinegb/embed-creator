@@ -16,7 +16,7 @@
 //
 // You may contact me via electronic mail at <valentinegb@icloud.com>.
 
-use anyhow::Context as _;
+use anyhow::{bail, Context as _};
 use poise::{
     command,
     serenity_prelude::{ClientBuilder, CreateEmbed, GatewayIntents},
@@ -33,9 +33,9 @@ struct UserData {}
 
 #[derive(Modal)]
 struct EmbedWizardModal {
-    title: String,
+    title: Option<String>,
     #[paragraph]
-    description: String,
+    description: Option<String>,
 }
 
 /// Create an embed, with some magic
@@ -50,11 +50,17 @@ async fn embed_wizard(ctx: ApplicationContext<'_>) -> Result<(), Error> {
     let EmbedWizardModal { title, description } = EmbedWizardModal::execute(ctx)
         .await?
         .context("Ran out of time for modal to submit")?;
+    let mut embed = CreateEmbed::new();
 
-    ctx.send(
-        CreateReply::default().embed(CreateEmbed::new().title(title).description(description)),
-    )
-    .await?;
+    if let Some(title) = title {
+        embed = embed.title(title);
+    }
+
+    if let Some(description) = description {
+        embed = embed.description(description);
+    }
+
+    ctx.send(CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }

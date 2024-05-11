@@ -57,29 +57,36 @@ pub(crate) fn modal_submit(
 ) -> Result<CreateInteractionResponse> {
     match custom_id {
         "title_and_description" => {
-            let mut title = None;
-            let mut description = None;
+            let mut title = String::new();
+            let mut description = String::new();
 
             for row in interaction.data.components {
                 for component in row.components {
                     if let ActionRowComponent::InputText(input_text) = component {
                         match input_text.custom_id.as_str() {
-                            "title" => title = input_text.value,
-                            "description" => description = input_text.value,
+                            "title" => {
+                                title = input_text
+                                    .value
+                                    .ok_or(anyhow!("`title` component is missing"))?
+                            }
+                            "description" => {
+                                description = input_text
+                                    .value
+                                    .ok_or(anyhow!("`description` component is missing"))?
+                            }
                             _ => (),
                         }
                     }
                 }
             }
 
+            if title.is_empty() && description.is_empty() {
+                bail!("Embed must have at least a title or description");
+            }
+
             Ok(CreateInteractionResponse::Message(
-                CreateInteractionResponseMessage::new().embed(
-                    CreateEmbed::new()
-                        .title(title.ok_or(anyhow!("`title` component is missing"))?)
-                        .description(
-                            description.ok_or(anyhow!("`description` component is missing"))?,
-                        ),
-                ),
+                CreateInteractionResponseMessage::new()
+                    .embed(CreateEmbed::new().title(title).description(description)),
             ))
         }
         other => bail!("Unknown modal `{other}`"),

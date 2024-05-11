@@ -36,6 +36,7 @@ struct UserData {}
 
 #[derive(Modal)]
 struct EmbedWizardModal {
+    #[max_length = 256]
     title: Option<String>,
     #[paragraph]
     description: Option<String>,

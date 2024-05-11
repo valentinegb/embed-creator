@@ -18,7 +18,7 @@
 
 use std::fmt::{Debug, Display};
 
-use anyhow::Context as _;
+use anyhow::{bail, Context as _};
 use poise::{
     command,
     serenity_prelude::{self, ClientBuilder, Color, CreateEmbed, GatewayIntents},
@@ -28,7 +28,7 @@ use shuttle_runtime::{SecretStore, Secrets};
 use shuttle_serenity::ShuttleSerenity;
 use tracing::error;
 
-type Error = Box<dyn std::error::Error + Send + Sync>;
+type Error = anyhow::Error;
 type ApplicationContext<'a> = poise::ApplicationContext<'a, UserData, Error>;
 
 /// User data, which is stored and accessible in all command invocations
@@ -54,6 +54,10 @@ async fn embed_wizard(ctx: ApplicationContext<'_>) -> Result<(), Error> {
         .await?
         .context("Ran out of time for modal to submit")?;
     let mut embed = CreateEmbed::new();
+
+    if title.is_none() && description.is_none() {
+        bail!("You must have at least a title or a description");
+    }
 
     if let Some(title) = title {
         embed = embed.title(title);

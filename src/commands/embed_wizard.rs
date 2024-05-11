@@ -39,10 +39,13 @@ pub(crate) fn execute() -> Result<CreateInteractionResponse> {
     Ok(CreateInteractionResponse::Modal(
         CreateModal::new(format!("{NAME}:title_and_description"), "Embed Wizard").components(vec![
             CreateActionRow::InputText(
-                CreateInputText::new(InputTextStyle::Short, "Title", "title").required(false),
+                CreateInputText::new(InputTextStyle::Short, "Title", "title")
+                    .max_length(256)
+                    .required(false),
             ),
             CreateActionRow::InputText(
                 CreateInputText::new(InputTextStyle::Paragraph, "Description", "description")
+                    .max_length(4096)
                     .required(false),
             ),
         ]),

@@ -20,7 +20,7 @@ mod commands;
 
 use std::{io::Read, sync::Arc};
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
 use axum::{
     async_trait, body,
     http::{HeaderMap, StatusCode},
@@ -115,33 +115,59 @@ async fn interactions(
     debug!("{interaction:#?}");
     info!("Responding to interaction");
 
+    let error_message = |err: Error| {
+        CreateInteractionResponse::Message(
+            CreateInteractionResponseMessage::new()
+                .embed(
+                    CreateEmbed::new()
+                        .title("Error")
+                        .description(err.to_string())
+                        .color(Color::RED),
+                )
+                .ephemeral(true),
+        )
+    };
+
     match interaction {
         Interaction::Ping(_) => Ok(Json(CreateInteractionResponse::Pong)),
         Interaction::Command(interaction) => Ok(Json(
             match interaction.data.name.as_str() {
                 commands::embed::NAME => commands::embed::execute(interaction),
-                commands::embed_wizard::NAME => commands::embed_wizard::execute(interaction),
-                other => Err(anyhow!("Command \"{other}\" cannot be executed")),
+                commands::embed_wizard::NAME => commands::embed_wizard::execute(),
+                other => Err(anyhow!("Command `{other}` cannot be executed")),
             }
             .unwrap_or_else(|err| {
                 error!("Failed to execute command: {err}");
 
-                CreateInteractionResponse::Message(
-                    CreateInteractionResponseMessage::new()
-                        .embed(
-                            CreateEmbed::new()
-                                .title("Error")
-                                .description(err.to_string())
-                                .color(Color::RED),
-                        )
-                        .ephemeral(true),
-                )
+                error_message(err)
             }),
         )),
         Interaction::Autocomplete(interaction) => {
             Ok(Json(commands::embed::autocomplete(interaction)))
         }
-        _ => Err(StatusCode::NOT_IMPLEMENTED),
+        Interaction::Modal(interaction) => Ok(Json(
+            match interaction.data.custom_id.clone().split_once(":") {
+                Some(custom_id) => match custom_id.0 {
+                    commands::embed_wizard::NAME => {
+                        commands::embed_wizard::modal_submit(interaction, custom_id.1)
+                    }
+                    other => Err(anyhow!(
+                        "Command `{other}` does not have a modal submit handler"
+                    )),
+                },
+                None => Err(anyhow!("Expected ID to contain `:`")),
+            }
+            .unwrap_or_else(|err| {
+                error!("Failed to respond to modal submit: {err}");
+
+                error_message(err)
+            }),
+        )),
+        other => {
+            error!("Recieved unimplemented kind of interaction: {other:#?}");
+
+            Err(StatusCode::NOT_IMPLEMENTED)
+        }
     }
 }
 

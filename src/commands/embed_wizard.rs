@@ -16,10 +16,11 @@
 //
 // You may contact me via electronic mail at <valentinegb@icloud.com>.
 
-use anyhow::Result;
+use anyhow::{anyhow, bail, Result};
 use serenity::all::{
-    CommandInteraction, CreateActionRow, CreateCommand, CreateInputText, CreateInteractionResponse,
-    CreateModal, InputTextStyle, InstallationContext, InteractionContext,
+    ActionRowComponent, CreateActionRow, CreateCommand, CreateEmbed, CreateInputText,
+    CreateInteractionResponse, CreateInteractionResponseMessage, CreateModal, InputTextStyle,
+    InstallationContext, InteractionContext, ModalInteraction,
 };
 
 pub(crate) const NAME: &str = "embed_wizard";
@@ -34,19 +35,51 @@ pub(crate) fn register() -> CreateCommand {
         ])
 }
 
-pub(crate) fn execute(interaction: CommandInteraction) -> Result<CreateInteractionResponse> {
+pub(crate) fn execute() -> Result<CreateInteractionResponse> {
     Ok(CreateInteractionResponse::Modal(
-        CreateModal::new("embed_wizard", "Embed Wizard").components(vec![
-            CreateActionRow::InputText(CreateInputText::new(
-                InputTextStyle::Short,
-                "Title",
-                "embed_wizard_title",
-            )),
-            CreateActionRow::InputText(CreateInputText::new(
-                InputTextStyle::Paragraph,
-                "Description",
-                "embed_wizard_description",
-            )),
+        CreateModal::new(format!("{NAME}:title_and_description"), "Embed Wizard").components(vec![
+            CreateActionRow::InputText(
+                CreateInputText::new(InputTextStyle::Short, "Title", "title").required(false),
+            ),
+            CreateActionRow::InputText(
+                CreateInputText::new(InputTextStyle::Paragraph, "Description", "description")
+                    .required(false),
+            ),
         ]),
     ))
+}
+
+pub(crate) fn modal_submit(
+    interaction: ModalInteraction,
+    custom_id: &str,
+) -> Result<CreateInteractionResponse> {
+    match custom_id {
+        "title_and_description" => {
+            let mut title = None;
+            let mut description = None;
+
+            for row in interaction.data.components {
+                for component in row.components {
+                    if let ActionRowComponent::InputText(input_text) = component {
+                        match input_text.custom_id.as_str() {
+                            "title" => title = input_text.value,
+                            "description" => description = input_text.value,
+                            _ => (),
+                        }
+                    }
+                }
+            }
+
+            Ok(CreateInteractionResponse::Message(
+                CreateInteractionResponseMessage::new().embed(
+                    CreateEmbed::new()
+                        .title(title.ok_or(anyhow!("`title` component is missing"))?)
+                        .description(
+                            description.ok_or(anyhow!("`description` component is missing"))?,
+                        ),
+                ),
+            ))
+        }
+        other => bail!("Unknown modal `{other}`"),
+    }
 }

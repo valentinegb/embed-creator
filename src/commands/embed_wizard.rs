@@ -45,7 +45,6 @@ pub(crate) fn execute() -> Result<CreateInteractionResponse> {
             ),
             CreateActionRow::InputText(
                 CreateInputText::new(InputTextStyle::Paragraph, "Description", "description")
-                    .max_length(4096)
                     .required(false),
             ),
         ]),

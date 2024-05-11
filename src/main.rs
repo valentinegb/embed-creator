@@ -16,14 +16,17 @@
 //
 // You may contact me via electronic mail at <valentinegb@icloud.com>.
 
-use anyhow::{bail, Context as _};
+use std::fmt::{Debug, Display};
+
+use anyhow::Context as _;
 use poise::{
     command,
-    serenity_prelude::{ClientBuilder, CreateEmbed, GatewayIntents},
-    CreateReply, Modal,
+    serenity_prelude::{self, ClientBuilder, Color, CreateEmbed, GatewayIntents},
+    CreateReply, FrameworkError, Modal,
 };
 use shuttle_runtime::{SecretStore, Secrets};
 use shuttle_serenity::ShuttleSerenity;
+use tracing::error;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type ApplicationContext<'a> = poise::ApplicationContext<'a, UserData, Error>;
@@ -65,6 +68,45 @@ async fn embed_wizard(ctx: ApplicationContext<'_>) -> Result<(), Error> {
     Ok(())
 }
 
+async fn on_error<U, E: Display + Debug>(
+    error: FrameworkError<'_, U, E>,
+) -> Result<(), serenity_prelude::Error> {
+    match error {
+        FrameworkError::Command { error, ctx, .. } => {
+            error!("An error occured in a command: {error}");
+            ctx.send(
+                CreateReply::default()
+                    .embed(
+                        CreateEmbed::new()
+                            .title("Error")
+                            .description(error.to_string())
+                            .color(Color::RED),
+                    )
+                    .ephemeral(true),
+            )
+            .await?;
+        }
+        FrameworkError::CommandPanic {
+            payload: _, ctx, ..
+        } => {
+            ctx.send(
+                CreateReply::default()
+                    .embed(
+                        CreateEmbed::new()
+                            .title("Fatal Error")
+                            .description("A *fatal* error occured. We can't show you the details, because it might contain sensitive information, but it has been logged for the developers to look at.")
+                            .color(Color::RED),
+                    )
+                    .ephemeral(true),
+            )
+            .await?;
+        }
+        _ => poise::builtins::on_error(error).await?,
+    }
+
+    Ok(())
+}
+
 #[shuttle_runtime::main]
 async fn main(#[Secrets] secret_store: SecretStore) -> ShuttleSerenity {
     let discord_token = secret_store
@@ -73,6 +115,13 @@ async fn main(#[Secrets] secret_store: SecretStore) -> ShuttleSerenity {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![embed_wizard()],
+            on_error: |error| {
+                Box::pin(async move {
+                    if let Err(e) = on_error(error).await {
+                        error!("Error while handling error: {}", e);
+                    }
+                })
+            },
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {

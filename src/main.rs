@@ -17,20 +17,39 @@
 // You may contact me via electronic mail at <valentinegb@icloud.com>.
 
 use anyhow::Context as _;
-use poise::serenity_prelude::{ClientBuilder, GatewayIntents};
+use poise::{
+    command,
+    serenity_prelude::{ClientBuilder, CreateEmbed, GatewayIntents},
+    CreateReply, Modal,
+};
 use shuttle_runtime::{SecretStore, Secrets};
 use shuttle_serenity::ShuttleSerenity;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, UserData, Error>;
+type ApplicationContext<'a> = poise::ApplicationContext<'a, UserData, Error>;
 
 /// User data, which is stored and accessible in all command invocations
 struct UserData {}
 
-/// Responds with "world!"
-#[poise::command(slash_command)]
-async fn hello(ctx: Context<'_>) -> Result<(), Error> {
-    ctx.say("world!").await?;
+#[derive(Modal)]
+struct EmbedWizardModal {
+    title: String,
+    #[paragraph]
+    description: String,
+}
+
+/// Create an embed, with some magic
+#[command(slash_command)]
+async fn embed_wizard(ctx: ApplicationContext<'_>) -> Result<(), Error> {
+    let EmbedWizardModal { title, description } = EmbedWizardModal::execute(ctx)
+        .await?
+        .context("Ran out of time for modal to submit")?;
+
+    ctx.send(
+        CreateReply::default().embed(CreateEmbed::new().title(title).description(description)),
+    )
+    .await?;
+
     Ok(())
 }
 
@@ -41,7 +60,7 @@ async fn main(#[Secrets] secret_store: SecretStore) -> ShuttleSerenity {
         .context("Discord token was not found")?;
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![hello()],
+            commands: vec![embed_wizard()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {

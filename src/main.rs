@@ -41,6 +41,7 @@ type ApplicationContext<'a> = poise::ApplicationContext<'a, UserData, Error>;
 struct UserData {}
 
 #[derive(Modal)]
+#[name = "Embed Wizard"]
 struct EmbedWizardModal {
     #[max_length = 256]
     title: Option<String>,
